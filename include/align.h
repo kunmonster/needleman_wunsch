@@ -53,7 +53,7 @@ class Align {
       res = 0;
     else if (temp == b)
       res = 1;
-    else if (temp == c)
+    else
       res = 2;
     return temp;
   }

@@ -98,12 +98,13 @@ void Align::fill_Matrix() {
         score_matrix[row + 1][col + 1] = score_matrix[row][col] + match;
         gap_row_flag = 0;
         col_gap_flag[col + 1] = 0;
+        print_score();
       } else {
         int mis = score_matrix[row][col] - this->mismatch;
-        int row_horizontal_gap_open = score_matrix[row][col + 1] - gap_open;
-        int row_horizontal_gap_extend = score_matrix[row][col + 1] - gap_extend;
-        int col_vertical_gap_open = score_matrix[row + 1][col] - gap_open;
-        int col_vertical_gap_extend = score_matrix[row + 1][col] - gap_extend;
+        int row_horizontal_gap_open = score_matrix[row + 1][col] - gap_open;
+        int row_horizontal_gap_extend = score_matrix[row + 1][col] - gap_extend;
+        int col_vertical_gap_open = score_matrix[row][col + 1] - gap_open;
+        int col_vertical_gap_extend = score_matrix[row][col + 1] - gap_extend;
         int res = -1;
 
         if (gap_row_flag == 0 && col_gap_flag[col + 1] == 0) {
@@ -127,14 +128,19 @@ void Align::fill_Matrix() {
           case 1:
             gap_row_flag = 1;
             col_gap_flag[col + 1] = 0;
+            break;
           case 2:
             gap_row_flag = 0;
             col_gap_flag[col + 1] = 1;
+            break;
           default:
             break;
         }
+        res = -1;
       }
+      print_score();
     }
+
     // 换行时,计数器清0
     gap_row_flag = 0;
   }

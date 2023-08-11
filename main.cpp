@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   // dealArgv(argc, argv);
   char seqb[] = {'A', 'G', 'C', 'T', '\0'};
   char seqa[] = {'A', 'C', 'G', '\0'};
-  Align obj(1, 1, 10, 5, seqb, seqa);
+  Align obj(5, 4, 10, 1, seqb, seqa);
   obj.print_score();
   obj.fill_Matrix();
   obj.print_score();
