@@ -7,7 +7,6 @@
 Align::Align() {
   this->match = 1;
   this->mismatch = -1;
-  this->gap = -1;
   this->seq_col_len = -1;
   this->seq_row_len = -1;
   this->seq_col = nullptr;
@@ -20,19 +19,19 @@ Align::Align() {
 /**
  * param:位置匹配情况的分数,不匹配时的分数,插入空位的分数,序列A,序列B
  */
-Align::Align(int p_match, int p_mis, int p_gap, char* seq_col, char* seq_row) {
+Align::Align(double p_match, double p_mis, double p_gap, char* seq_col,
+             char* seq_row) {
   this->match = p_match;
   this->mismatch = p_mis;
-  this->gap = p_gap;
   this->seq_col = seq_col;
   this->seq_row = seq_row;
   this->seq_col_len = strlen(seq_col);
   this->seq_row_len = strlen(seq_row);
   matrix_col = seq_col_len + 1;
   matrix_row = seq_row_len + 1;
-  this->score_matrix = new int*[matrix_row];
+  this->score_matrix = new double*[matrix_row];
   for (int i = 0; i < matrix_row; ++i) {
-    *(score_matrix + i) = new int[matrix_col]{0};
+    *(score_matrix + i) = new double[matrix_col]{0};
   }
   for (int i = 1; i < matrix_row; ++i) {
     score_matrix[i][0] = score_matrix[i - 1][0] - 1;
@@ -42,8 +41,8 @@ Align::Align(int p_match, int p_mis, int p_gap, char* seq_col, char* seq_row) {
   }
 }
 
-Align::Align(int p_match, int p_mis, int p_gap_open, int p_gap_extend,
-             char* seq_col, char* seq_row) {
+Align::Align(double p_match, double p_mis, double p_gap_open,
+             double p_gap_extend, char* seq_col, char* seq_row) {
   this->match = p_match;
   this->mismatch = p_mis;
   this->gap_open = p_gap_open;
@@ -55,9 +54,9 @@ Align::Align(int p_match, int p_mis, int p_gap_open, int p_gap_extend,
   this->get_row_col();
   matrix_col = seq_col_len + 1;
   matrix_row = seq_row_len + 1;
-  this->score_matrix = new int*[matrix_row];
+  this->score_matrix = new double*[matrix_row];
   for (int i = 0; i < matrix_row; ++i) {
-    *(score_matrix + i) = new int[matrix_col]{0};
+    *(score_matrix + i) = new double[matrix_col]{0};
   }
   int row_gap_count = 0;
   for (int i = 1; i < matrix_row; ++i) {
@@ -98,27 +97,27 @@ void Align::fill_Matrix() {
         score_matrix[row + 1][col + 1] = score_matrix[row][col] + match;
         gap_row_flag = 0;
         col_gap_flag[col + 1] = 0;
-        print_score();
       } else {
         int mis = score_matrix[row][col] - this->mismatch;
-        int row_horizontal_gap_open = score_matrix[row + 1][col] - gap_open;
-        int row_horizontal_gap_extend = score_matrix[row + 1][col] - gap_extend;
-        int col_vertical_gap_open = score_matrix[row][col + 1] - gap_open;
-        int col_vertical_gap_extend = score_matrix[row][col + 1] - gap_extend;
+
         int res = -1;
 
         if (gap_row_flag == 0 && col_gap_flag[col + 1] == 0) {
-          score_matrix[row + 1][col + 1] += max_score(
-              mis, row_horizontal_gap_open, col_vertical_gap_open, res);
+          score_matrix[row + 1][col + 1] +=
+              max_score(mis, score_matrix[row + 1][col] - gap_open,
+                        score_matrix[row][col + 1] - gap_open, res);
         } else if (gap_row_flag != 0) {
-          score_matrix[row + 1][col + 1] += max_score(
-              mis, row_horizontal_gap_extend, col_vertical_gap_open, res);
+          score_matrix[row + 1][col + 1] +=
+              max_score(mis, score_matrix[row + 1][col] - gap_extend,
+                        score_matrix[row][col + 1] - gap_open, res);
         } else if (col_gap_flag[col + 1] != 0) {
-          score_matrix[row + 1][col + 1] += max_score(
-              mis, row_horizontal_gap_open, col_vertical_gap_extend, res);
+          score_matrix[row + 1][col + 1] +=
+              max_score(mis, score_matrix[row + 1][col] - gap_open,
+                        score_matrix[row][col + 1] - gap_extend, res);
         } else {
-          score_matrix[row + 1][col + 1] += max_score(
-              mis, row_horizontal_gap_extend, col_vertical_gap_extend, res);
+          score_matrix[row + 1][col + 1] +=
+              max_score(mis, score_matrix[row + 1][col] - gap_extend,
+                        score_matrix[row][col + 1] - gap_extend, res);
         }
         switch (res) {
           case 0:
@@ -138,12 +137,12 @@ void Align::fill_Matrix() {
         }
         res = -1;
       }
-      print_score();
     }
 
-    // 换行时,计数器清0
+    // 换行时，置行gap标志为0
     gap_row_flag = 0;
   }
+  // 删除列gap标志
   delete col_gap_flag;
 }
 
@@ -152,7 +151,7 @@ void Align::fill_Matrix() {
  */
 void Align::recv(int row, int col) {
   // 参数中的索引使用得分矩阵的索引,在访问序列时,需要转换一下
-  if (row < 0 || col < 0) {
+  if (row == 0 && col == 0) {
     cout << endl << endl;
     for (vector<char>::iterator itr = stk_col.end() - 1; itr >= stk_col.begin();
          --itr) {
@@ -165,40 +164,89 @@ void Align::recv(int row, int col) {
     }
     return;
   }
-  if (seq_col[col - 1] == seq_row[row - 1]) {
+
+  if (row >= 1 && col >= 1 &&
+      (score_matrix[row][col] == score_matrix[row - 1][col - 1] + match) &&
+      seq_col[col - 1] == seq_row[row - 1]) {
     stk_col.push_back(seq_col[col - 1]);
     stk_row.push_back(seq_row[row - 1]);
     recv(row - 1, col - 1);
     stk_col.pop_back();
     stk_row.pop_back();
-  } else {
-    if (col > 0 && score_matrix[row][col] == score_matrix[row][col - 1] + gap) {
-      // 矩阵中从左边一个gap得到
-      stk_row.push_back('-');
-      stk_col.push_back(seq_col[col - 1]);
-      recv(row, col - 1);
-      stk_col.pop_back();
-      stk_row.pop_back();
-    }
-    if (row > 0 && score_matrix[row][col] == score_matrix[row - 1][col] + gap) {
-      // 从上一行该列得到
-      stk_row.push_back(seq_row[row - 1]);
-      stk_col.push_back('-');
-      recv(row - 1, col);
-      stk_col.pop_back();
-      stk_row.pop_back();
-    }
+  }
+  bool row_tag = false;
 
-    if (row > 0 && col > 0 &&
-        score_matrix[row][col] == score_matrix[row - 1][col - 1] + mismatch) {
-      // mismatch
-      stk_col.push_back(seq_col[col - 1]);
-      stk_row.push_back(seq_row[row - 1]);
-      recv(row - 1, col - 1);
-      stk_col.pop_back();
-      stk_row.pop_back();
+  if (col == 1 &&
+      (score_matrix[row][col] == score_matrix[row][col - 1] - gap_open)) {
+    row_tag = true;
+
+  } else if (col > 1) {
+    if (score_matrix[row][col] == score_matrix[row][col - 1] - gap_open &&
+        score_matrix[row][col - 1] != score_matrix[row][col - 2] - gap_open &&
+        score_matrix[row][col - 1] != score_matrix[row][col - 2] - gap_extend) {
+      // 当前为open,向前检测一个,看是否为gap_open
+      // 为open
+      row_tag = true;
+    } else if (score_matrix[row][col] ==
+                   score_matrix[row][col - 1] - gap_extend &&
+               (score_matrix[row][col - 1] ==
+                    score_matrix[row][col - 2] - gap_open ||
+                score_matrix[row][col - 1] ==
+                    score_matrix[row][col - 2] - gap_extend)) {
+      row_tag = true;
     }
   }
+  if (row_tag) {
+    // 矩阵中从左边一个gap得到
+    stk_row.push_back('-');
+    stk_col.push_back(seq_col[col - 1]);
+    recv(row, col - 1);
+    stk_col.pop_back();
+    stk_row.pop_back();
+  }
+
+  bool col_tag = false;
+  if (row == 1 &&
+      score_matrix[row][col] == score_matrix[row - 1][col] - gap_open) {
+    col_tag = true;
+  }
+
+  // 需要向前检测满不满足当前gap情况
+  else if (row > 1) {
+    if (score_matrix[row][col] == score_matrix[row - 1][col] - gap_open &&
+        score_matrix[row - 1][col] != score_matrix[row - 2][col] - gap_open &&
+        score_matrix[row - 1][col] != score_matrix[row - 2][col] - gap_extend)
+      col_tag = true;
+
+    else if (score_matrix[row][col] ==
+                 score_matrix[row - 1][col] - gap_extend &&
+             (score_matrix[row - 1][col] ==
+                  score_matrix[row - 2][col] - gap_open ||
+              score_matrix[row - 1][col] ==
+                  score_matrix[row - 2][col] - gap_extend))
+      col_tag = true;
+    else
+      col_tag = false;
+  }
+  if (col_tag) {
+    // 从上一行该列得到
+    stk_row.push_back(seq_row[row - 1]);
+    stk_col.push_back('-');
+    recv(row - 1, col);
+    stk_col.pop_back();
+    stk_row.pop_back();
+  }
+
+  if (row > 0 && col > 0 &&
+      score_matrix[row][col] == score_matrix[row - 1][col - 1] - mismatch) {
+    // mismatch
+    stk_col.push_back(seq_col[col - 1]);
+    stk_row.push_back(seq_row[row - 1]);
+    recv(row - 1, col - 1);
+    stk_col.pop_back();
+    stk_row.pop_back();
+  }
+  // }
 }
 
 void Align::track_back() { recv(seq_row_len, seq_col_len); }

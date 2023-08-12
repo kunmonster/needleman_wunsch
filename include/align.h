@@ -9,12 +9,11 @@ class Align {
  private:
   // 这里的分数均采用正数,只表示得分或者罚分的多少
 
-  int match;     // 匹配时得分
-  int mismatch;  // 选择不匹配时罚分
-  int gap;       // 空位罚分
+  double match;     // 匹配时得分
+  double mismatch;  // 选择不匹配时罚分
 
-  int gap_open;    // 最开始的空位
-  int gap_extend;  // 中间的空位
+  double gap_open;    // 第一个gap罚分
+  double gap_extend;  // 
 
   int seq_col_len;  // 序列长度
   int seq_row_len;
@@ -25,17 +24,17 @@ class Align {
   char* seq_col;
   char* seq_row;
 
-  int** score_matrix;  // 得分矩阵
+  double** score_matrix;  // 得分矩阵
 
   vector<char> stk_col;
   vector<char> stk_row;
 
  public:
   Align();
-  explicit Align(int p_match, int p_mis, int p_gap, char* seq_col,
+  explicit Align(double p_match, double p_mis, double p_gap, char* seq_col,
                  char* seq_row);
-  explicit Align(int p_match, int p_mis, int p_gap_open, int p_gap_extend,
-                 char* seq_col, char* seq_row);
+  explicit Align(double p_match, double p_mis, double p_gap_open,
+                 double p_gap_extend, char* seq_col, char* seq_row);
 
   ~Align();
 
@@ -45,8 +44,9 @@ class Align {
   void print_score();
 
   // 用于分数大小比较
-  inline int max_score(const int& a, const int& b, const int& c, int& res) {
-    int temp = INT32_MIN;
+  inline double max_score(const double& a, const double& b, const double& c,
+                       int& res) {
+    double temp = INT32_MIN;
     temp = max(a, b);
     temp = c > temp ? c : temp;
     if (temp == a)
