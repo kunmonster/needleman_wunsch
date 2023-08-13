@@ -1,4 +1,4 @@
-#include "../include/align.h"
+#include "align.h"
 
 #include <iostream>
 /*

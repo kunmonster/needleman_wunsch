@@ -1,5 +1,5 @@
-#ifndef _ALIGN_H_
-#define _ALIGN_H_
+#ifndef ALIGN_H
+#define ALIGN_H
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -13,7 +13,7 @@ class Align {
   double mismatch;  // 选择不匹配时罚分
 
   double gap_open;    // 第一个gap罚分
-  double gap_extend;  // 
+  double gap_extend;  //
 
   int seq_col_len;  // 序列长度
   int seq_row_len;
@@ -45,7 +45,7 @@ class Align {
 
   // 用于分数大小比较
   inline double max_score(const double& a, const double& b, const double& c,
-                       int& res) {
+                          int& res) {
     double temp = INT32_MIN;
     temp = max(a, b);
     temp = c > temp ? c : temp;

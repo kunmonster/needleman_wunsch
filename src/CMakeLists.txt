@@ -2,4 +2,7 @@
 # 并将名称保存到 DIR_LIB_SRCS 变量
 aux_source_directory(. DIR_LIB_SRCS)
 # 生成链接库
+
+include_directories(../include)
 add_library (Align ${DIR_LIB_SRCS})
+add_library(Common common.cpp)

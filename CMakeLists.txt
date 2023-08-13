@@ -17,6 +17,7 @@ add_subdirectory(src)
 include_directories(include)
 
 
+
 # 指定生成目标
 add_executable(needleman-wunsch main.cpp)
 
