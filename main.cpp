@@ -33,6 +33,17 @@ int main(int argc, char** argv) {
   obj.print_score();
   obj.track_back();
   cout << endl << endl;
+
+  for (vector<fasta*>::iterator itr = seq_list.begin(); itr < seq_list.end();
+       ++itr) {
+    if (NULL != *itr) {
+      delete (*itr)->id;
+      delete (*itr)->seq;
+      delete *itr;
+    }
+  }
+  seq_list.clear();
+  cout << seq_list.size();
   return 0;
 }
 
