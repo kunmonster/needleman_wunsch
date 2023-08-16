@@ -1,3 +1,5 @@
+#include <getopt.h>
+
 #include <iostream>
 #include <vector>
 
@@ -19,15 +21,11 @@ using namespace std;
 void dealArgv(int, char**);
 
 int main(int argc, char** argv) {
+  // dealArgv(argc, argv);
   vector<fasta*> seq_list;
   fileRead(argv[1], seq_list);
 
-  // char* seqA;
-  // char* seqB;
-  // dealArgv(argc, argv);
-  // char seqb[] = {'A', 'G', 'C', 'C', 'C', 'T', 'T', '\0'};
-  // char seqa[] = {'A', 'C', 'C', 'T', 'T', '\0'};
-  Align obj(5, 4, 10, 2, seq_list[0]->seq, seq_list[1]->seq);
+  Align obj(5, 4, 10, 0.5, seq_list[0]->seq, seq_list[1]->seq);
   obj.print_score();
   obj.fill_Matrix();
   obj.print_score();
@@ -50,6 +48,11 @@ int main(int argc, char** argv) {
 void dealArgv(int argc, char** argv) {
   if (argc <= 1) {
     // 输出提示
-    cout << "Usage: align [OPTIONS] [FILE | SEQ_REF] [FILE | SEQ]" << endl;
+    cout << "Usage: align [OPTION]  [FILE | SEQ]" << endl;
+    cout << "Align two sequences and track back the alginment result with "
+            "multiple "
+            "option(match,mismatch,gap-open,gap-extending)"
+         << endl;
   }
+  exit(0);
 }

@@ -98,24 +98,24 @@ void Align::fill_Matrix() {
         gap_row_flag = 0;
         col_gap_flag[col + 1] = 0;
       } else {
-        int mis = score_matrix[row][col] - this->mismatch;
+        double mis = score_matrix[row][col] - this->mismatch;
 
         int res = -1;
 
         if (gap_row_flag == 0 && col_gap_flag[col + 1] == 0) {
-          score_matrix[row + 1][col + 1] +=
+          score_matrix[row + 1][col + 1] =
               max_score(mis, score_matrix[row + 1][col] - gap_open,
                         score_matrix[row][col + 1] - gap_open, res);
-        } else if (gap_row_flag != 0) {
-          score_matrix[row + 1][col + 1] +=
+        } else if (gap_row_flag != 0 && col_gap_flag[col + 1] == 0) {
+          score_matrix[row + 1][col + 1] =
               max_score(mis, score_matrix[row + 1][col] - gap_extend,
                         score_matrix[row][col + 1] - gap_open, res);
-        } else if (col_gap_flag[col + 1] != 0) {
-          score_matrix[row + 1][col + 1] +=
+        } else if (col_gap_flag[col + 1] != 0 && gap_row_flag == 0) {
+          score_matrix[row + 1][col + 1] =
               max_score(mis, score_matrix[row + 1][col] - gap_open,
                         score_matrix[row][col + 1] - gap_extend, res);
         } else {
-          score_matrix[row + 1][col + 1] +=
+          score_matrix[row + 1][col + 1] =
               max_score(mis, score_matrix[row + 1][col] - gap_extend,
                         score_matrix[row][col + 1] - gap_extend, res);
         }
@@ -135,6 +135,7 @@ void Align::fill_Matrix() {
           default:
             break;
         }
+
         res = -1;
       }
     }

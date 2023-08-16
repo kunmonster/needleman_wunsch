@@ -49,12 +49,15 @@ class Align {
     double temp = INT32_MIN;
     temp = max(a, b);
     temp = c > temp ? c : temp;
-    if (temp == a)
-      res = 0;
-    else if (temp == b)
+
+    // 涉及到策略选择，当三种或者其中两种相同时，返回值的策略
+
+    if (temp == b)
       res = 1;
-    else
+    else if (temp == c)
       res = 2;
+    else
+      res = 0;
     return temp;
   }
 
