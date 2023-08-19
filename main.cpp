@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   vector<fasta*> seq_list;
   fileRead(argv[1], seq_list);
 
-  Align obj(5, 4, 10, 0.5, seq_list[0]->seq, seq_list[1]->seq);
+  Align obj(1, 1, 1, 1, seq_list[0]->seq, seq_list[1]->seq);
   obj.print_score();
   obj.fill_Matrix();
   obj.print_score();

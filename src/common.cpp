@@ -22,22 +22,20 @@ void fileRead(const char* file_path, vector<fasta*>& seq_list) {
     if (c == '\n') {
       continue;
     } else if (c == '>') {
-      // 新开了一个header
+      // 读取新的header
       // 此时需要创建一个fasta struct然后将读取的信息写入进这个结构体
-      // 开一个循环读到换行符为止
+      // 开一个循环读到换行符为止(读取序列ID)
       // 先将上面的seq和header写入
       if (!seq_detail.empty() && !header.empty()) {
         fasta* seq = new fasta(seq_detail.length());
         seq->id = new char[header.size() + 1];
         seq->seq = new char[seq_detail.size() + 1];
-        // seq->len = seq_detail.length();
 
         strcpy(seq->id, header.c_str());
         strcpy(seq->seq, seq_detail.c_str());
         seq_list.push_back(seq);
         header.clear();
         seq_detail.clear();
-        // continue;
       }
       char z;
       while ((z = fin.get()) != '\n') {

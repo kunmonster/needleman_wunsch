@@ -52,6 +52,7 @@ Align::Align(double p_match, double p_mis, double p_gap_open,
   this->seq_col_len = strlen(seq_col);
   this->seq_row_len = strlen(seq_row);
   this->get_row_col();
+  this->same_residence = 0;
   matrix_col = seq_col_len + 1;
   matrix_row = seq_row_len + 1;
   this->score_matrix = new double*[matrix_row];
@@ -154,6 +155,14 @@ void Align::recv(int row, int col) {
   // 参数中的索引使用得分矩阵的索引,在访问序列时,需要转换一下
   if (row == 0 && col == 0) {
     cout << endl << endl;
+
+    double resemblance = (double)this->same_residence / (double)stk_col.size();
+    cout << "序列一长度:" << seq_col_len << endl;
+    cout << "序列二长度:" << seq_row_len << endl;
+    cout << "加入gap后长度:" << stk_col.size() << endl;
+    cout << "相同残基数:" << this->same_residence << endl;
+    cout << "相似度:" << resemblance << endl;
+
     for (vector<char>::iterator itr = stk_col.end() - 1; itr >= stk_col.begin();
          --itr) {
       cout << *itr;
@@ -171,9 +180,13 @@ void Align::recv(int row, int col) {
       seq_col[col - 1] == seq_row[row - 1]) {
     stk_col.push_back(seq_col[col - 1]);
     stk_row.push_back(seq_row[row - 1]);
+    // 相同时相同数字加一
+    this->same_residence++;
     recv(row - 1, col - 1);
     stk_col.pop_back();
     stk_row.pop_back();
+    // 这种情况完了过后，将其减一
+    this->same_residence--;
   }
   bool row_tag = false;
 
@@ -257,7 +270,17 @@ void Align::track_back() { recv(seq_row_len, seq_col_len); }
  * 打印分数矩阵
  */
 void Align::print_score() {
+  cout << "\t\t";
+  for (int i = 0; i < seq_col_len; ++i) {
+    cout << seq_col[i] << "\t";
+  }
+  cout << endl;
+
   for (int i = 0; i < matrix_row; ++i) {
+    if (i == 0) {
+      cout << "\t";
+    }
+    if (i >= 1) cout << seq_row[i - 1] << "\t";
     for (int j = 0; j < matrix_col; ++j) {
       cout << score_matrix[i][j] << "\t";
     }

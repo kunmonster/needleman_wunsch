@@ -26,6 +26,8 @@ class Align {
 
   double** score_matrix;  // 得分矩阵
 
+  int same_residence;
+
   vector<char> stk_col;
   vector<char> stk_row;
 
