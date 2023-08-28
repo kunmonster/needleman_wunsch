@@ -12,7 +12,7 @@ class Align {
   double match;     // 匹配时得分
   double mismatch;  // 选择不匹配时罚分
 
-  double gap_open;    // 第一个gap罚分
+  double gap_open;    // 第一个gap罚分  
   double gap_extend;  //
 
   int seq_col_len;  // 序列长度
